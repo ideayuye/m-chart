@@ -48,10 +48,11 @@ function drawText(
   context: CanvasRenderingContext2D,
   text: string,
   x: number,
-  y: number
+  y: number,
+  dpr: number = 1
 ) {
   // 设置文本样式（如果需要的话）
-  context.font = "12px Arial"; // 字体大小和类型
+  context.font = `${12 * dpr}px Arial`; // 字体大小和类型
   context.textAlign = "center";
   context.textBaseline = "middle";
   // 获取文本的宽度和高度，以便计算文本中心点坐标
@@ -62,8 +63,8 @@ function drawText(
   // 计算文本左上角的位置（以文本中心为基准）
   const centerX = x;
   const centerY = y; // 注意这里通常是以基线为基准定位，所以y轴会偏上一些，具体数值根据字体大小和样式调整
-  const rw = textWidth + 16;
-  const rh = textHeight + 8;
+  const rw = textWidth + 16 * dpr;
+  const rh = textHeight + 8 * dpr;
   const ox = x - rw / 2;
   const oy = y - rh / 2 - 1;
   const borderRadius = rh * 0.5;
@@ -86,11 +87,13 @@ export class RadarChart {
   size: number;
   radius: number;
   bgRadius: number;
+  dpr: number;
   constructor(
     context: CanvasRenderingContext2D,
     dimension: any[],
     values: any[],
-    size: number
+    size: number,
+    dpr: number
   ) {
     this.context = context;
     this.dimension = dimension;
@@ -98,6 +101,7 @@ export class RadarChart {
     this.size = size;
     this.radius = size * 0.9 * 0.5;
     this.bgRadius = size * 0.6 * 0.5;
+    this.dpr = dpr;
 
     // 计算每个维度文本展示的位置
     this.labels = this.calculate();
@@ -166,7 +170,7 @@ export class RadarChart {
     this.context.fill(); // 填充闭合区域
     points.forEach((p) => {
       this.context.beginPath();
-      this.context.arc(p.x, p.y, 3, 0, 2 * Math.PI, true);
+      this.context.arc(p.x, p.y, 3 * this.dpr, 0, 2 * Math.PI, true);
       this.context.fillStyle = "#384855";
       this.context.fill();
       this.context.closePath();
@@ -176,9 +180,10 @@ export class RadarChart {
   drawScale() {
     const max = this.dimension[0]?.max || 100;
     const segment = 10;
-    const scaleNum = parseInt(max / segment);
+    const scaleNum = Math.round(max / segment);
     for (let i = 1; i < scaleNum; i++) {
       this.context.beginPath();
+      this.context.lineWidth = this.dpr;
       this.context.strokeStyle = "#F2F5F6";
       this.context.arc(0, 0, (this.bgRadius * i) / scaleNum, 0, 2 * Math.PI);
       this.context.stroke();
@@ -188,10 +193,13 @@ export class RadarChart {
 
   drawDimensions() {
     this.labels.forEach((item, index) => {
-      drawText(this.context, item.title, item.x, item.y);
+      drawText(this.context, item.title, item.x, item.y, this.dpr);
       const toX = item.x * 0.75;
       const toY = item.y * 0.75;
+
+      // const dx = Math.sqrt(3 * this.dpr);
       this.context.beginPath();
+      this.context.lineWidth = this.dpr;
       this.context.strokeStyle = "#F2F5F6";
       this.context.moveTo(0, 0);
       this.context.lineTo(toX, toY);
@@ -201,10 +209,13 @@ export class RadarChart {
 
       this.context.beginPath();
       this.context.fillStyle = "#D1D6DA";
-      this.context.arc(toX, toY, 5, 0, 2 * Math.PI);
+      this.context.arc(toX, toY, 5 * this.dpr, 0, 2 * Math.PI);
       this.context.fill();
+      this.context.closePath();
+
+      this.context.beginPath();
       this.context.strokeStyle = "#F2F5F6";
-      this.context.arc(toX, toY, 3, 0, 2 * Math.PI);
+      this.context.arc(toX, toY, 3 * this.dpr, 0, 2 * Math.PI);
       this.context.stroke();
       this.context.closePath();
     });
@@ -213,7 +224,7 @@ export class RadarChart {
   drawBg() {
     this.context.beginPath();
     this.context.arc(0, 0, this.bgRadius, 0, 2 * Math.PI);
-    this.context.fillStyle = "#dddddd";
+    this.context.fillStyle = "#cccccc";
     this.context.fill();
     this.context.closePath();
   }

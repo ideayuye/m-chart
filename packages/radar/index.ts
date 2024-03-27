@@ -9,15 +9,20 @@ const dimension = [
   { name: "肢体功能", max: 100 },
 ];
 
-const values = [42, 30, 20, 35, 50, 18];
+const values = [80, 30, 20, 35, 50, 68];
 
 function drawFn() {
   const canvas = document.querySelector("#myCanvas") as HTMLCanvasElement;
   if (canvas) {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerWidth;
-    let width = canvas.clientWidth;
-    let height = canvas.clientHeight;
+    const dpr = window.devicePixelRatio;
+    const w = window.innerWidth;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(w * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${w}px`;
+
+    let width = canvas.clientWidth * dpr;
+    let height = canvas.clientHeight * dpr;
     let context = canvas.getContext("2d");
     if (context) {
       const mx = width * 0.5;
@@ -25,7 +30,13 @@ function drawFn() {
       context.fillStyle = "#EBEFF2";
       context.fillRect(0, 0, width, height);
       context.translate(mx, my);
-      const radarChart = new RadarChart(context, dimension, values, 280);
+      const radarChart = new RadarChart(
+        context,
+        dimension,
+        values,
+        280 * dpr,
+        dpr
+      );
       radarChart.drawBg();
       radarChart.drawScale();
       radarChart.drawDimensions();

@@ -7,6 +7,10 @@ import dts from "vite-plugin-dts";
 export default defineConfig({
   plugins: [VueSetupExtend(), dts()],
   base: "./",
+  server: {
+    port: 3001,
+    host: "0.0.0.0",
+  },
   build: {
     target: "modules",
     //打包文件目录
